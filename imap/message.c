@@ -54,6 +54,9 @@
 #include "protos.h"
 #include "bcache/lib.h"
 #include "imap/lib.h"
+#ifdef USE_AUTOCRYPT
+#include "autocrypt/lib.h"
+#endif
 #ifdef ENABLE_NLS
 #include <libintl.h>
 #endif

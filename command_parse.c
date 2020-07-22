@@ -925,8 +925,7 @@ enum CommandResult parse_mailboxes(struct Buffer *buf, struct Buffer *s,
   // These won't change during this command
   struct Account *a = ct_get_account();
   struct ConfigSubset *sub = a ? a->sub : NeoMutt->sub;
-  struct Buffer *folder = mutt_buffer_pool_get();
-  cs_subset_str_string_get(sub, "folder", folder);
+  const char *c_folder = cs_subset_string(sub, "folder");
 
   int rc = MUTT_CMD_ERROR;
   struct Path *p = NULL;
@@ -946,6 +945,10 @@ enum CommandResult parse_mailboxes(struct Buffer *buf, struct Buffer *s,
     mutt_extract_token(buf, s, MUTT_TOKEN_NO_FLAGS);
     if (mutt_buffer_is_empty(buf))
     {
+      if (p->desc)
+      {
+        //XXX log an error
+      }
       // Skip empty tokens
       mutt_path_free(&p);
       continue;
@@ -953,7 +956,7 @@ enum CommandResult parse_mailboxes(struct Buffer *buf, struct Buffer *s,
 
     p->orig = mutt_buffer_strdup(buf);
 
-    mx_path2_resolve(p, mutt_b2s(folder));
+    mx_path2_resolve(p, c_folder);
     if (p->type <= MUTT_UNKNOWN)
     {
       mutt_error("Unknown Mailbox: %s", p->orig);
@@ -1058,7 +1061,6 @@ enum CommandResult parse_mailboxes(struct Buffer *buf, struct Buffer *s,
 done:
   mutt_path_free(&p);
   mailbox_free(&m);
-  mutt_buffer_pool_release(&folder);
   return rc;
 }
 

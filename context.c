@@ -193,7 +193,8 @@ void ctx_update(struct Context *ctx)
     }
   }
 
-  mutt_sort_headers(ctx, true); /* rethread from scratch */
+  /* rethread from scratch */
+  mutt_sort_headers(ctx->mailbox, ctx->threads, true, &ctx->vsize);
 }
 
 /**
@@ -313,7 +314,7 @@ int ctx_mailbox_observer(struct NotifyCallback *nc)
       ctx_update_tables(ctx, true);
       break;
     case NT_MAILBOX_RESORT:
-      mutt_sort_headers(ctx, true);
+      mutt_sort_headers(ctx->mailbox, ctx->threads, true, &ctx->vsize);
       break;
   }
 

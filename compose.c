@@ -168,8 +168,8 @@ enum HeaderField
   HDR_ATTACH_TITLE, ///< The "-- Attachments" line
 };
 
-int HeaderPadding[HDR_ATTACH_TITLE] = { 0 };
-int MaxHeaderWidth = 0;
+static int HeaderPadding[HDR_ATTACH_TITLE] = { 0 };
+static int MaxHeaderWidth = 0;
 
 static const char *const Prompts[] = {
   /* L10N: Compose menu field.  May not want to translate. */

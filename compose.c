@@ -92,6 +92,9 @@
 /// Maximum number of rows to use for the To:, Cc:, Bcc: fields
 #define MAX_ADDR_ROWS 5
 
+/// Maximum number of rows to use for the Headers: field
+#define MAX_USER_HDR_ROWS 5
+
 /* These Config Variables are only used in compose.c */
 char *C_ComposeFormat; ///< Config: printf-like format string for the Compose panel's status bar
 char *C_Ispell; ///< Config: External command to perform spell-checking
@@ -470,6 +473,30 @@ static int calc_security(struct Email *e, short *rows)
 #endif
 
   return *rows;
+}
+
+/**
+ * calc_user_hdrs - Calculate how many rows are needed for user headers
+ * @param hdrs  Header List
+ * @retval num  Rows needed, limited to #MAX_USER_HDR_ROWS
+ */
+static int calc_user_hdrs(const struct ListHead *hdrs)
+{
+  int rows = 1;
+  struct ListNode *first = STAILQ_FIRST(hdrs);
+  if (first)
+  {
+    /* First header is displayed on first line, so count from second */
+    struct ListNode *np = STAILQ_NEXT(first, entries);
+    if (np)
+    {
+      STAILQ_FOREACH_FROM(np, hdrs, entries)
+      {
+        rows++;
+      }
+    }
+  }
+  return MIN(rows, MAX_USER_HDR_ROWS);
 }
 
 /**

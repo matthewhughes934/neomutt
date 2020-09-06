@@ -1011,15 +1011,18 @@ enum CommandResult parse_my_hdr(struct Buffer *buf, struct Buffer *s,
     return MUTT_CMD_WARNING;
   }
 
+  struct EventHeader event =  { buf };
   struct ListNode *n = find_header(&UserHeader, buf->data);
 
   if (!n)
   {
     add_header(&UserHeader, buf);
+    notify_send(NeoMutt->notify, NT_HEADER, NT_HEADER_ADD, &event);
   }
   else
   {
     update_header(n, buf);
+    notify_send(NeoMutt->notify, NT_HEADER, NT_HEADER_CHANGE, &event);
   }
 
   return MUTT_CMD_SUCCESS;

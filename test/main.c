@@ -184,6 +184,10 @@
   NEOMUTT_TEST_ITEM(test_emaillist_clear)                                      \
   NEOMUTT_TEST_ITEM(test_mutt_autocrypthdr_free)                               \
   NEOMUTT_TEST_ITEM(test_mutt_autocrypthdr_new)                                \
+  NEOMUTT_TEST_ITEM(test_email_find_header)                                    \
+  NEOMUTT_TEST_ITEM(test_email_add_header)                                     \
+  NEOMUTT_TEST_ITEM(test_email_update_header)                                  \
+  NEOMUTT_TEST_ITEM(test_email_set_header)                                     \
                                                                                \
   /* envelope */                                                               \
   NEOMUTT_TEST_ITEM(test_mutt_env_cmp_strict)                                  \

@@ -156,3 +156,63 @@ int emaillist_add_email(struct EmailList *el, struct Email *e)
 
   return 0;
 }
+
+/**
+ * find_header - Find a header, matching on its field, in a list of headers
+ * @param hdrlist List of headers to search
+ * @param header  The header to search for. Either of the form "X-Header:" or "X-Header: value"
+ * @retval node   The node in the list matching the header
+ * @retval NULL   If no matching header is found
+ */
+struct ListNode *find_header(const struct ListHead *hdrlist, const char *header) {
+  struct ListNode *n = NULL;
+
+  const int keylen = strchr(header, ':') - header + 1;
+
+  STAILQ_FOREACH(n, hdrlist, entries) {
+    if (mutt_istrn_equal(n->data, header, keylen))
+      return n;
+  }
+  return n;
+}
+
+/**
+ * add_header - Add a header to a list
+ * @param hdrlist List of headers to search
+ * @param buf     Buffer whose data to use to set the value of the header
+ * @retval node   The created header
+ */
+struct ListNode *add_header(struct ListHead *hdrlist, const struct Buffer *buf)
+{
+  struct ListNode *n = mutt_list_insert_tail(hdrlist, NULL);
+  n->data = mutt_buffer_strdup(buf);
+
+  return n;
+}
+
+/**
+ * update_header - Update an existing header
+ * @param hdr     The header to update
+ * @param buf     Buffer whose data to use to update the value of the header
+ * @retval node   The updated header
+ */
+struct ListNode *update_header(struct ListNode *hdr, const struct Buffer *buf)
+{
+  FREE(&hdr->data);
+  hdr->data = mutt_buffer_strdup(buf);
+
+  return hdr;
+}
+
+/**
+ * set_header - Set a header value in a list. If a header exists with the same field, update it, otherwise add a new header
+ * @param hdrlist List of headers to search
+ * @param buf     Buffer whose data to use to set the value of the header
+ * @retval node   The updated or created header
+ */
+struct ListNode *set_header(struct ListHead *hdrlist, const struct Buffer *buf)
+{
+  struct ListNode *n = find_header(hdrlist, buf->data);
+
+  return n == NULL ? add_header(hdrlist, buf) : update_header(n, buf);
+}

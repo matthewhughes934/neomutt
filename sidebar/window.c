@@ -801,6 +801,28 @@ static int draw_divider(struct SidebarWindowData *wdata, struct MuttWindow *win,
   return width;
 }
 
+static int draw_underline(struct SidebarWindowData *wdata, struct MuttWindow *win,
+                          int num_rows, int num_cols)
+{
+  if ((num_rows < 1) || (num_cols < 1) || (wdata->divider_width > num_cols))
+    return 0;
+
+  mutt_curses_set_color(MT_COLOR_SIDEBAR_DIVIDER);
+
+  for (int i = 0; i < num_cols - 1; i++)
+  {
+    mutt_window_move(win, i, num_rows);
+    // underline character, should be configurable
+    mutt_window_addch(ACS_HLINE);
+  }
+  mutt_window_move(win, num_cols - 1, num_rows);
+  // corner character, should be configurable
+  mutt_window_addch(ACS_LRCORNER);
+
+  mutt_curses_set_color(MT_COLOR_NORMAL);
+  return 0;
+}
+
 /**
  * fill_empty_space - Wipe the remaining Sidebar space
  * @param win        Window to draw on
@@ -873,6 +895,8 @@ int sb_repaint(struct MuttWindow *win)
   fill_empty_space(win, row, num_rows - row, wdata->divider_width,
                    num_cols - wdata->divider_width);
   draw_divider(wdata, win, num_rows, num_cols);
+  /* Watch out for the bottom status/message line */
+  draw_underline(wdata, win, num_rows - 1, num_cols);
 
   return 0;
 }

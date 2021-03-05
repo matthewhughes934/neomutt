@@ -939,17 +939,14 @@ enum CommandResult parse_mailboxes(struct Buffer *buf, struct Buffer *s,
       return MUTT_CMD_ERROR;
     }
 
-    bool new_account = false;
     struct Account *a = mx_ac_find(m);
-    if (!a)
+    const bool new_account = (a == NULL);
+
+    if (new_account)
     {
       a = account_new(NULL, NeoMutt->sub);
       a->type = m->type;
-      new_account = true;
-    }
-
-    if (!new_account)
-    {
+    } else {
       struct Mailbox *m_old = mx_mbox_find(a, m->realpath);
       if (m_old)
       {

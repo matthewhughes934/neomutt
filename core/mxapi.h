@@ -361,6 +361,14 @@ struct MxOps
    * - @a path is not NULL and not empty
    */
   int (*path_is_empty)     (const char *path);
+
+  /**
+   * mbox_create - create a new mailbox
+   * @param a Account to create the mailbox on
+   * @param path
+   * @param name The name of the mailbox
+  */
+  struct Mailbox *(*mbox_create)       (struct Account *a, const char *path, const char *name);
 };
 
 #endif /* MUTT_CORE_MXAPI_H */

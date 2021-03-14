@@ -68,6 +68,8 @@
 #define MMC_NEW_DIR (1 << 0) ///< 'new' directory changed
 #define MMC_CUR_DIR (1 << 1) ///< 'cur' directory changed
 
+static const char *maildir_subdirs[] = {"cur", "tmp", "new"};
+
 /**
  * maildir_check_dir - Check for new mail / mail counts
  * @param m           Mailbox to check
@@ -1610,6 +1612,57 @@ static enum MailboxType maildir_path_probe(const char *path, const struct stat *
   return MUTT_UNKNOWN;
 }
 
+/**
+ * maildir_check_dir - create a new maildir directory tree
+ * @param path Path to create the maildir under
+ * @retval -1 Creation failed, we attempt to cleanup anything we already created
+ * @retval  0 Creation success
+ *
+ */
+static int maildir_create_maildir(const char *path)
+{
+  char tmp[PATH_MAX];
+
+  for (int i = 0; i < mutt_array_size(maildir_subdirs); i++)
+  {
+    snprintf(tmp, sizeof(tmp), "%s/%s", path, maildir_subdirs[i]);
+
+    if (mutt_file_mkdir(tmp, S_IRWXU) != 0)
+    {
+      mutt_perror(tmp);
+
+      /* Cleanup what we've already made */
+      for (int j = i - 1; j >= 0; j--)
+      {
+        snprintf(tmp, sizeof(tmp), "%s/%s", path, maildir_subdirs[j]);
+        /* Should probably check errors again here... */
+        /* alert user if something went wrong */
+        rmdir(tmp);
+      }
+      rmdir(path);
+      return -1;
+    }
+  }
+  return 0;
+}
+
+/**
+ *  maildir_create_mailbox - Create a maildir mailbox - Implements - MxOps::mbox_create()
+ */
+struct Mailbox *maildir_create_mailbox(struct Account *a, const char *path, const char *name)
+{
+  if (maildir_create_maildir(path) != 0)
+    return NULL;
+  struct Mailbox *m = mailbox_new();
+
+  mutt_buffer_strcpy(&m->pathbuf, path);
+  m->realpath = mutt_str_dup(path);
+  m->name = mutt_str_dup(name);
+  m->type = MUTT_MAILDIR;
+
+  return m;
+}
+
 // clang-format off
 /**
  * MxMaildirOps - Maildir Mailbox - Implements ::MxOps
@@ -1639,5 +1692,6 @@ struct MxOps MxMaildirOps = {
   .path_pretty      = maildir_path_pretty,
   .path_parent      = maildir_path_parent,
   .path_is_empty    = maildir_check_empty,
+  .mbox_create      = maildir_create_mailbox,
 };
 // clang-format on
